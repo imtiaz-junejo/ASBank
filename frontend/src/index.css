@@ -4,6 +4,11 @@
   --color-brightColor: #039BAB;
   --color-backgroundColor: #03C9D7;
   --color-textColor: #333333;
+  /* ASBank landing theme */
+  --asbank-orange: #E85D04;
+  --asbank-blue: #003366;
+  --asbank-grey-bg: #F5F5F5;
+  --asbank-dark-grey: #333333;
 }
 
 /* Use @layer base so Tailwind utilities can override margin/padding inside components */
@@ -14,21 +19,23 @@
     box-sizing: border-box;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Prevent page scroll on auth screen; allow auth to fill viewport */
   html, body {
     overflow-x: hidden;
-    height: 100%;
+    min-height: 100%;
   }
 
   #root,
   .App {
-    height: 100%;
     min-height: 100%;
   }
 }
