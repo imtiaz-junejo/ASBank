@@ -125,206 +125,183 @@ function makeCardSvg(seed, label) {
   return svgDataUri(`\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"800\" height=\"600\" viewBox=\"0 0 800 600\">\n  <defs>\n    <linearGradient id=\"bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0\" stop-color=\"${bg1}\" />\n      <stop offset=\"1\" stop-color=\"${bg2}\" />\n    </linearGradient>\n    <linearGradient id=\"a\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0\" stop-color=\"${b}\" />\n      <stop offset=\"1\" stop-color=\"${o}\" />\n    </linearGradient>\n  </defs>\n  <rect width=\"800\" height=\"600\" fill=\"url(#bg)\"/>\n  <path d=\"M0 420 C 140 330, 240 520, 380 430 S 640 410, 800 470\" fill=\"none\" stroke=\"rgba(0,51,102,0.22)\" stroke-width=\"10\"/>\n  <path d=\"M0 480 C 160 420, 260 560, 420 490 S 650 470, 800 520\" fill=\"none\" stroke=\"rgba(232,93,4,0.22)\" stroke-width=\"10\"/>\n  <circle cx=\"${x}\" cy=\"${y}\" r=\"88\" fill=\"rgba(232,93,4,0.18)\"/>\n  <circle cx=\"${x + 120}\" cy=\"${y + 90}\" r=\"110\" fill=\"rgba(0,51,102,0.12)\"/>\n  <rect x=\"56\" y=\"56\" width=\"688\" height=\"488\" rx=\"24\" fill=\"rgba(255,255,255,0.65)\" stroke=\"rgba(0,0,0,0.06)\"/>\n  <text x=\"92\" y=\"132\" font-family=\"Inter, Arial\" font-size=\"30\" font-weight=\"800\" fill=\"${b}\">ASBank</text>\n  <text x=\"92\" y=\"170\" font-family=\"Inter, Arial\" font-size=\"18\" fill=\"rgba(0,0,0,0.62)\">${label}</text>\n  <rect x=\"92\" y=\"210\" width=\"180\" height=\"10\" rx=\"5\" fill=\"rgba(0,0,0,0.12)\"/>\n  <rect x=\"92\" y=\"236\" width=\"280\" height=\"10\" rx=\"5\" fill=\"rgba(0,0,0,0.10)\"/>\n  <rect x=\"92\" y=\"262\" width=\"240\" height=\"10\" rx=\"5\" fill=\"rgba(0,0,0,0.10)\"/>\n  <rect x=\"92\" y=\"306\" width=\"220\" height=\"44\" rx=\"10\" fill=\"url(#a)\" opacity=\"0.95\"/>\n  <text x=\"112\" y=\"336\" font-family=\"Inter, Arial\" font-size=\"16\" font-weight=\"700\" fill=\"#ffffff\">Explore</text>\n</svg>\n`);
 }
 
-function SectionDigitalBanking() {
+const HERO_SLIDES = [
+  {
+    id: 1,
+    title: 'Zarkhez-e — A Landmark Initiative By The Govt. of Pakistan to Empower Farmers',
+    body:
+      'A major initiative by the Government of Pakistan enabling farmers to access easy agricultural loans of up to PKR 1 million through Zarkhez-e. Apply from home and purchase certified inputs and diesel for your farming needs via the Zarkhez-e app.',
+    seed: 'zarkhez',
+  },
+  {
+    id: 2,
+    title: 'Instant Digital Account Opening',
+    body:
+      'Open your digital account from the comfort of your home and start banking instantly with ASBank digital channels.',
+    seed: 'digital-account',
+  },
+  {
+    id: 3,
+    title: 'myASB – Banking At Your Fingertips',
+    body:
+      'Pay bills, transfer funds, and manage your finances securely anytime, anywhere with the myASB mobile app.',
+    seed: 'myasb-app',
+  },
+  {
+    id: 4,
+    title: 'Empowering Women Entrepreneurs',
+    body:
+      'Specialised financing and advisory services designed to help women-led businesses grow and thrive.',
+    seed: 'women-entrepreneurs',
+  },
+];
+
+function makeZarkhezHeroSvg(seed) {
+  const hash = Array.from(seed).reduce((a, c) => a + c.charCodeAt(0), 0);
+  const offset = 40 + (hash % 40);
+  return svgDataUri(`\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"900\" height=\"400\" viewBox=\"0 0 900 400\">\n  <defs>\n    <linearGradient id=\"sky\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n      <stop offset=\"0\" stop-color=\"#e5f3ff\" />\n      <stop offset=\"1\" stop-color=\"#ffffff\" />\n    </linearGradient>\n    <linearGradient id=\"field\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n      <stop offset=\"0\" stop-color=\"#f9c74f\" />\n      <stop offset=\"1\" stop-color=\"#f9844a\" />\n    </linearGradient>\n  </defs>\n  <rect width=\"900\" height=\"400\" fill=\"#ffffff\" rx=\"32\" />\n  <rect x=\"0\" y=\"0\" width=\"900\" height=\"260\" fill=\"url(#sky)\" rx=\"32\" />\n  <rect x=\"0\" y=\"220\" width=\"900\" height=\"180\" fill=\"url(#field)\" />\n  <g opacity=\"0.35\" fill=\"#f3722c\">\n    <rect x=\"80\" y=\"${230 + offset / 4}\" width=\"110\" height=\"80\" rx=\"8\" />\n    <rect x=\"210\" y=\"${220 + offset / 6}\" width=\"130\" height=\"90\" rx=\"8\" />\n    <rect x=\"360\" y=\"${240 + offset / 5}\" width=\"150\" height=\"70\" rx=\"8\" />\n  </g>\n  <g transform=\"translate(540 70)\">\n    <rect x=\"30\" y=\"0\" width=\"200\" height=\"320\" rx=\"28\" fill=\"#ffffff\" stroke=\"#f3722c\" stroke-width=\"4\" />\n    <rect x=\"52\" y=\"40\" width=\"156\" height=\"220\" rx=\"20\" fill=\"#0f172a\" />\n    <rect x=\"52\" y=\"40\" width=\"156\" height=\"60\" rx=\"20\" fill=\"#22c55e\" />\n    <text x=\"130\" y=\"78\" text-anchor=\"middle\" font-family=\"Inter, Arial\" font-size=\"18\" font-weight=\"700\" fill=\"#ffffff\">zarkhez-e</text>\n    <circle cx=\"130\" cy=\"190\" r=\"42\" fill=\"#eab308\" />\n    <path d=\"M110 200 L130 165 L150 200 Z\" fill=\"#f97316\" />\n    <rect x=\"90\" y=\"260\" width=\"80\" height=\"10\" rx=\"5\" fill=\"#e5e7eb\" />\n  </g>\n  <g transform=\"translate(650 150)\">\n    <rect x=\"0\" y=\"60\" width=\"160\" height=\"90\" rx=\"16\" fill=\"#ffffff\" stroke=\"#f3722c\" stroke-width=\"3\" />\n    <rect x=\"18\" y=\"82\" width=\"124\" height=\"14\" rx=\"7\" fill=\"#e5e7eb\" />\n    <rect x=\"18\" y=\"106\" width=\"90\" height=\"10\" rx=\"5\" fill=\"#e5e7eb\" />\n  </g>\n</svg>\n`);
+}
+
+function SectionHeroCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const total = HERO_SLIDES.length;
+  const current = HERO_SLIDES[activeIndex];
+
+  const goPrev = () => {
+    setActiveIndex((prev) => (prev - 1 + total) % total);
+  };
+
+  const goNext = () => {
+    setActiveIndex((prev) => (prev + 1) % total);
+  };
+
   return (
-    <section id="digital" className="py-12 md:py-16" style={{ backgroundColor: ASB_GREY_BG }}>
-      <div className="max-w-[1400px] mx-auto px-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
-        <div className="flex-1">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            <span style={{ color: ASB_ORANGE }}>DIGITAL</span>
-            <span style={{ color: ASB_DARK_GREY }}> BANKING</span>
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Banking at Your Fingertips
-          </p>
-          <div className="flex flex-wrap gap-3">
+    <section className="py-10" style={{ backgroundColor: '#f7f7f7' }}>
+      <div className="max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
+        <div className="space-y-6">
+          <h2 className="text-3xl md:text-[32px] font-bold leading-snug" style={{ color: ASB_DARK_GREY }}>
+            {current.title}
+          </h2>
+          <p className="text-sm md:text-base text-gray-600 max-w-2xl">{current.body}</p>
+
+          <div className="flex items-center gap-3 pt-4">
             <button
               type="button"
-              className="px-5 py-2.5 rounded text-white font-semibold text-sm"
+              onClick={goPrev}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white"
               style={{ backgroundColor: ASB_ORANGE }}
+              aria-label="Previous slide"
             >
-              myASB
+              ‹
             </button>
+
+            <div className="flex items-center gap-2">
+              {HERO_SLIDES.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  onClick={() => setActiveIndex(index)}
+                  className="w-2.5 h-2.5 rounded-full border transition-all"
+                  style={{
+                    backgroundColor: index === activeIndex ? ASB_ORANGE : 'transparent',
+                    borderColor: index === activeIndex ? ASB_ORANGE : '#d4d4d8',
+                    transform: index === activeIndex ? 'scale(1.2)' : 'scale(1)',
+                  }}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+
             <button
               type="button"
-              className="px-5 py-2.5 rounded font-semibold text-sm border-2 border-gray-800 bg-white text-gray-800"
+              onClick={goNext}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+              style={{ backgroundColor: ASB_ORANGE }}
+              aria-label="Next slide"
             >
-              myASB WALLET
+              ›
             </button>
-            <button
-              type="button"
-              className="px-5 py-2.5 rounded font-semibold text-sm border-2 border-gray-800 bg-white text-gray-800"
-            >
-              myASB WHATSAPP BANKING
-            </button>
-            <button
-              type="button"
-              className="px-5 py-2.5 rounded font-semibold text-sm border-2 border-gray-800 bg-white text-gray-800"
-            >
-              DIGITAL ACCOUNT
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-8 mt-10 text-gray-600">
-            <div className="flex items-center gap-2">
-              <span
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ backgroundColor: ASB_ORANGE }}
-              >
-                📱
-              </span>
-              <span>Bill Payments</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ backgroundColor: ASB_BLUE }}
-              >
-                ↻
-              </span>
-              <span>Funds Transfer / Raast</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ backgroundColor: ASB_ORANGE }}
-              >
-                Rs
-              </span>
-              <span>Mobile Top Up</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ backgroundColor: ASB_BLUE }}
-              >
-                ₹
-              </span>
-              <span>Get Instant Loans</span>
-            </div>
           </div>
         </div>
-        <div className="flex-1 flex justify-center">
-          <div
-            className="relative w-full max-w-md aspect-4/3 rounded-lg overflow-hidden border-4 bg-white shadow-lg"
-            style={{ borderColor: ASB_ORANGE }}
-          >
+
+        <div className="flex justify-center">
+          <div className="w-full max-w-xl rounded-[32px] overflow-hidden shadow-lg border border-gray-200 bg-white">
             <img
-              src={makeHeroSvg('DIGITAL BANKING', 'Banking at Your Fingertips')}
-              alt="Digital banking"
+              src={makeZarkhezHeroSvg(current.seed)}
+              alt={current.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 flex items-end justify-center bg-linear-to-t from-black/60 to-transparent p-6">
-              <div className="text-center text-white">
-                <p className="text-sm mb-2">
-                  Simply use myASB and enjoy the numerous benefits of online
-                  banking
-                </p>
-                <p className="text-xs opacity-90 mb-4">
-                  Download the myASB app from the Google Play Store, Apple App
-                  Store, or Huawei AppGallery today!
-                </p>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded text-white font-semibold text-sm"
-                  style={{ backgroundColor: ASB_ORANGE }}
-                >
-                  Explore More →
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <section
-        className="py-6 flex items-center gap-4 overflow-x-auto px-4"
-        style={{ backgroundColor: ASB_GREY_BG }}
-      >
-        <button
-          type="button"
-          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white"
-          style={{ backgroundColor: ASB_ORANGE }}
-        >
-          ‹
-        </button>
-        <div className="flex gap-8 shrink-0">
-          <div className="flex flex-col items-center gap-2 min-w-[100px]">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Unclaimed
+      <div className="mt-8 border-t border-gray-200 pt-6">
+        <div className="max-w-[900px] mx-auto flex items-center gap-6 px-4">
+          <button
+            type="button"
+            onClick={goPrev}
+            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white"
+            style={{ backgroundColor: ASB_ORANGE }}
+            aria-label="Previous quick link"
+          >
+            ‹
+          </button>
+          <div className="flex-1 flex justify-between gap-4 text-xs md:text-sm text-gray-700">
+            <div className="flex flex-col items-center gap-2 min-w-[90px] text-center">
+              <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center text-[11px] text-gray-700">
+                Unclaimed
+              </div>
+              <span>Unclaimed Deposit</span>
             </div>
-            <span className="text-sm text-gray-700">Unclaimed Deposit</span>
+            <div className="flex flex-col items-center gap-2 min-w-[90px] text-center">
+              <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center text-[11px] text-gray-700">
+                Charges
+              </div>
+              <span>Schedule of Charges – Islamic Banking</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 min-w-[90px] text-center">
+              <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center text-[11px] text-gray-700">
+                Feedback
+              </div>
+              <span>Customer Feedback Form</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 min-w-[90px] text-center">
+              <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center text-[11px] text-gray-700">
+                QR
+              </div>
+              <span>QR Code Generator</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 min-w-[90px] text-center">
+              <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center text-[11px] text-gray-700">
+                Allied
+              </div>
+              <span>Allied Pay</span>
+            </div>
           </div>
-          <div className="flex flex-col items-center gap-2 min-w-[100px]">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Charges
-            </div>
-            <span className="text-sm text-gray-700">
-              Schedule of Charges - Islamic Banking
-            </span>
-          </div>
-          <div className="flex flex-col items-center gap-2 min-w-[100px]">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Feedback
-            </div>
-            <span className="text-sm text-gray-700">Customer Feedback Form</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 min-w-[100px]">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              QR
-            </div>
-            <span className="text-sm text-gray-700">QR Code Generator</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 min-w-[100px]">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Pay
-            </div>
-            <span className="text-sm text-gray-700">ASBank Pay</span>
-          </div>
-          <a href="#loans" className="flex flex-col items-center gap-2 min-w-[100px] hover:opacity-80">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Loan
-            </div>
-            <span className="text-sm text-gray-700">Loans</span>
-          </a>
-          <a href="#cards" className="flex flex-col items-center gap-2 min-w-[100px] hover:opacity-80">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Card
-            </div>
-            <span className="text-sm text-gray-700">ASBank Cards</span>
-          </a>
-          <a href="#news" className="flex flex-col items-center gap-2 min-w-[100px] hover:opacity-80">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              News
-            </div>
-            <span className="text-sm text-gray-700">Latest News</span>
-          </a>
-          <a href="#awards" className="flex flex-col items-center gap-2 min-w-[100px] hover:opacity-80">
-            <div className="w-14 h-14 rounded-lg bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
-              Award
-            </div>
-            <span className="text-sm text-gray-700">Awards</span>
-          </a>
+          <button
+            type="button"
+            onClick={goNext}
+            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white"
+            style={{ backgroundColor: ASB_ORANGE }}
+            aria-label="Next quick link"
+          >
+            ›
+          </button>
         </div>
-        <button
-          type="button"
-          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white"
-          style={{ backgroundColor: ASB_ORANGE }}
-        >
-          ›
-        </button>
-      </section>
+      </div>
     </section>
   );
 }
+
 export default function ASBankLanding() {
   return (
     <ASBankLayout>
       {/* All sections in the exact image order (scrolling landing) */}
-      <SectionDigitalBanking />
+      <SectionHeroCarousel />
+      <SectionCards />
       <SectionLoans />
       <SectionLatestNews />
       <SectionAwards />
-      <SectionCards />
     </ASBankLayout>
   );
 }
