@@ -45,6 +45,9 @@ with app.app_context():
         if 'password_hash' not in columns:
             db.session.execute(text("ALTER TABLE user ADD COLUMN password_hash VARCHAR(255)"))
             added = True
+        if 'voice_language' not in columns:
+            db.session.execute(text("ALTER TABLE user ADD COLUMN voice_language VARCHAR(8)"))
+            added = True
         if added:
             db.session.commit()
         # Backfill existing rows only when we have name/password_hash and possibly old username
@@ -100,6 +103,7 @@ def signup():
         email = request.form.get('email')
         password = request.form.get('password')
         audio_file = request.files.get('audio')
+        language = (request.form.get('language') or '').strip().lower() or None
 
         # Validate input
         if not name or not name.strip():
@@ -125,7 +129,7 @@ def signup():
         audio_file.save(filepath)
 
         # Transcribe audio using Whisper
-        transcription = transcribe_audio(filepath)
+        transcription, detected_language = transcribe_audio(filepath, language=language)
         
         if not transcription:
             if os.path.exists(filepath):
@@ -138,6 +142,7 @@ def signup():
             email=email,
             password_hash=generate_password_hash(password),
             voice_phrase=transcription,
+            voice_language=language or detected_language,
             audio_file_path=filepath
         )
         db.session.add(new_user)
@@ -165,6 +170,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         audio_file = request.files.get('audio')
+        language = (request.form.get('language') or '').strip().lower() or None
 
         # Validate input
         if not email or not email.strip():
@@ -190,8 +196,35 @@ def login():
         temp_filepath = os.path.join(app.config['UPLOAD_FOLDER'], temp_filename)
         audio_file.save(temp_filepath)
 
-        # Transcribe audio using Whisper
-        transcription = transcribe_audio(temp_filepath)
+        # Decide language:
+        # - If user selected language, honor it
+        # - Else if user has stored preference, use it
+        # - Else try both English and Urdu and pick best similarity (reduces language mixing)
+        stored_lang = (user.voice_language or '').strip().lower() or None
+        lang_to_use = language or stored_lang
+
+        if lang_to_use in ("en", "ur"):
+            transcription, _ = transcribe_audio(temp_filepath, language=lang_to_use)
+            candidates = [(lang_to_use, transcription)]
+        else:
+            candidates = []
+            for lang in ("en", "ur"):
+                t, _ = transcribe_audio(temp_filepath, language=lang)
+                candidates.append((lang, t))
+            # also try auto-detect as a fallback
+            t_auto, _ = transcribe_audio(temp_filepath, language=None)
+            candidates.append(("auto", t_auto))
+
+            # pick best similarity vs stored phrase
+            best_lang, best_text, best_sim = None, None, -1.0
+            for lang, text in candidates:
+                if not text:
+                    continue
+                sim = calculate_similarity(user.voice_phrase, text)
+                if sim > best_sim:
+                    best_sim, best_lang, best_text = sim, lang, text
+            transcription = best_text
+            print(f"[VOICE LOGIN] picked_lang={best_lang} best_similarity={best_sim:.2f}")
         
         # Clean up temporary file
         if os.path.exists(temp_filepath):

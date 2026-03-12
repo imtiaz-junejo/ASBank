@@ -16,6 +16,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     voice_phrase = db.Column(db.Text, nullable=False)  # Transcribed voice phrase
+    voice_language = db.Column(db.String(8))  # 'en' | 'ur' | None (auto/unknown)
     audio_file_path = db.Column(db.String(255))  # Path to stored audio file
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

@@ -168,8 +168,15 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      await apiLogin(email, password, audioBlob);
-      navigate('/');
+      const data = await apiLogin(email, password, audioBlob);
+      if (data && data.user) {
+        try {
+          localStorage.setItem('vb_user', JSON.stringify(data.user));
+        } catch {
+          // ignore storage errors
+        }
+      }
+      navigate('/dashboard');
     } catch (err) {
       setSubmitError(err.message || 'Login failed');
     } finally {
