@@ -176,7 +176,7 @@ function SectionHeroCarousel() {
   };
 
   return (
-    <section className="py-10" style={{ backgroundColor: '#f7f7f7' }}>
+    <section className="py-10 mt-14" style={{ backgroundColor: '#f7f7f7' }}>
       <div className="max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
         <div className="space-y-6">
           <h2 className="text-3xl md:text-[32px] font-bold leading-snug" style={{ color: ASB_DARK_GREY }}>

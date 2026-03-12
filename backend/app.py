@@ -8,8 +8,11 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import re
 import difflib
 from models import db, User
+
+EMAIL_REGEX = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 from whisper_service import transcribe_audio
 
 app = Flask(__name__)
@@ -99,9 +102,14 @@ def signup():
         audio_file = request.files.get('audio')
 
         # Validate input
-        if not name or not email or not password:
-            return jsonify({'success': False, 'error': 'Name, email and password are required'}), 400
-
+        if not name or not name.strip():
+            return jsonify({'success': False, 'error': 'Name is required'}), 400
+        if not email or not email.strip():
+            return jsonify({'success': False, 'error': 'Email is required'}), 400
+        if not EMAIL_REGEX.match(email):
+            return jsonify({'success': False, 'error': 'Enter a valid email address'}), 400
+        if not password or len(password) < 6:
+            return jsonify({'success': False, 'error': 'Password must be at least 6 characters'}), 400
         if not audio_file:
             return jsonify({'success': False, 'error': 'Audio file is required'}), 400
 
@@ -159,9 +167,12 @@ def login():
         audio_file = request.files.get('audio')
 
         # Validate input
-        if not email or not password:
-            return jsonify({'success': False, 'error': 'Email and password are required'}), 400
-
+        if not email or not email.strip():
+            return jsonify({'success': False, 'error': 'Email is required'}), 400
+        if not EMAIL_REGEX.match(email):
+            return jsonify({'success': False, 'error': 'Enter a valid email address'}), 400
+        if not password:
+            return jsonify({'success': False, 'error': 'Password is required'}), 400
         if not audio_file:
             return jsonify({'success': False, 'error': 'Audio file is required'}), 400
 

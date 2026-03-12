@@ -24,7 +24,7 @@ function ReviewSection({ title, children, onEdit }) {
   );
 }
 
-export default function ReviewDetailsStep({ data, onEditSection, onSubmit }) {
+export default function ReviewDetailsStep({ data, onEditSection, onSubmit, error, loading }) {
   const accountTypeLabel =
     { asaan: 'Asaan Account', savings: 'Savings Account', current: 'Current Account' }[data.accountType] ||
     'Asaan Account';
@@ -63,14 +63,18 @@ export default function ReviewDetailsStep({ data, onEditSection, onSubmit }) {
         </ReviewSection>
       </div>
 
+      {error && (
+        <p className="mt-4 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">{error}</p>
+      )}
       <div className="mt-10 flex justify-center">
         <button
           type="button"
           onClick={onSubmit}
-          className="px-10 py-1.5 rounded-md font-semibold text-white text-base"
+          disabled={loading}
+          className="px-10 py-1.5 rounded-md font-semibold text-white text-base disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ backgroundColor: ASB_BLUE }}
         >
-          SUBMIT
+          {loading ? 'Submitting...' : 'SUBMIT'}
         </button>
       </div>
     </div>

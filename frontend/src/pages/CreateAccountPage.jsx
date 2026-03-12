@@ -7,11 +7,50 @@ import ProfessionalDetailsStep from '../components/createAccount/ProfessionalDet
 import AccountSecurityStep from '../components/createAccount/AccountSecurityStep';
 import ReviewDetailsStep from '../components/createAccount/ReviewDetailsStep';
 import CongratulationsStep from '../components/createAccount/CongratulationsStep';
+import { signup as apiSignup } from '../services/api';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function CreateAccountPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({});
+  const [submitError, setSubmitError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const validateReview = () => {
+    const d = formData;
+    const name = d.accountTitle || d.name;
+    const email = d.email;
+    const password = d.password;
+    const audio = d.audioBlob;
+    const errs = [];
+    if (!name?.trim()) errs.push('Account title is required');
+    if (!email?.trim()) errs.push('Email is required');
+    else if (!EMAIL_REGEX.test(email)) errs.push('Enter a valid email address');
+    if (!password || password.length < 6) errs.push('Password must be at least 6 characters');
+    if (!audio) errs.push('Voice recording is required');
+    return errs;
+  };
+
+  const handleSubmit = async () => {
+    const errs = validateReview();
+    if (errs.length) {
+      setSubmitError(errs.join('. '));
+      return;
+    }
+    setSubmitError('');
+    setLoading(true);
+    try {
+      const name = formData.accountTitle || formData.name || 'User';
+      await apiSignup(name, formData.email, formData.password, formData.audioBlob);
+      setStep(6);
+    } catch (err) {
+      setSubmitError(err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
     if (step === 1) {
@@ -68,7 +107,9 @@ export default function CreateAccountPage() {
           <ReviewDetailsStep
             data={formData}
             onEditSection={goToStep}
-            onSubmit={() => setStep(6)}
+            onSubmit={handleSubmit}
+            error={submitError}
+            loading={loading}
           />
         )}
         {step === 6 && (

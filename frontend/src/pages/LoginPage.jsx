@@ -1,8 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
+import { login as apiLogin } from '../services/api';
 
 const ASB_ORANGE = '#E85D04';
 const ASB_BLUE = '#003366';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function svgDataUri(svg) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -131,14 +135,46 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const leftImg = useMemo(() => makeLeftIllustration(), []);
 
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = (e) => {
+  const {
+    isRecording,
+    audioBlob,
+    error: voiceError,
+    startRecording,
+    stopRecording,
+    hasRecorded,
+  } = useVoiceRecorder();
+
+  const validate = () => {
+    const e = {};
+    if (!email.trim()) e.email = 'Email is required';
+    else if (!EMAIL_REGEX.test(email)) e.email = 'Enter a valid email address';
+    if (!password) e.password = 'Password is required';
+    if (!audioBlob) e.voice = 'Please record your voice for verification';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
-    // For now: just route back to home (wire to backend later).
-    navigate('/');
+    setSubmitError('');
+    if (!validate()) return;
+
+    setLoading(true);
+    try {
+      await apiLogin(email, password, audioBlob);
+      navigate('/');
+    } catch (err) {
+      setSubmitError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -171,17 +207,18 @@ export default function LoginPage() {
 
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Username</label>
+                <label className="block text-sm text-gray-600 mb-1">Email</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">👤</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">✉</span>
                   <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
-                    className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    required
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: '' })); }}
+                    placeholder="your@email.com"
+                    className={`w-full pl-10 pr-3 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.email ? 'border-red-500' : 'border-gray-200'}`}
                   />
                 </div>
+                {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
               </div>
 
               <div>
@@ -191,10 +228,9 @@ export default function LoginPage() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: '' })); }}
                     placeholder="Password"
-                    className="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    required
+                    className={`w-full pl-10 pr-10 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.password ? 'border-red-500' : 'border-gray-200'}`}
                   />
                   <button
                     type="button"
@@ -205,6 +241,40 @@ export default function LoginPage() {
                     {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
+                {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Voice verification</label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md font-medium text-sm border-2 transition-colors"
+                    style={{
+                      backgroundColor: isRecording ? '#dc2626' : hasRecorded ? 'rgba(34,197,94,0.15)' : 'rgba(0,51,102,0.08)',
+                      color: isRecording ? '#fff' : hasRecorded ? '#16a34a' : ASB_BLUE,
+                      borderColor: isRecording ? '#dc2626' : hasRecorded ? '#16a34a' : 'rgba(0,51,102,0.3)',
+                    }}
+                  >
+                    {isRecording ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                        Stop recording
+                      </>
+                    ) : hasRecorded ? (
+                      <>✓ Voice recorded – Record again</>
+                    ) : (
+                      <>🎤 Record voice</>
+                    )}
+                  </button>
+                  <span className="text-xs text-gray-500">
+                    {isRecording ? 'Recording...' : hasRecorded ? 'Ready for login' : 'Say your phrase for verification'}
+                  </span>
+                </div>
+                {(voiceError || errors.voice) && (
+                  <p className="text-xs text-red-500 mt-1">{voiceError || errors.voice}</p>
+                )}
               </div>
 
               <div className="text-xs text-gray-500">
@@ -213,12 +283,16 @@ export default function LoginPage() {
                 </a>
               </div>
 
+              {submitError && (
+                <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">{submitError}</p>
+              )}
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-md text-white font-semibold hover:opacity-95 transition-opacity"
+                disabled={loading}
+                className="w-full py-2.5 rounded-md text-white font-semibold hover:opacity-95 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: ASB_ORANGE }}
               >
-                Sign In
+                {loading ? 'Signing in...' : 'Sign In'}
               </button>
 
               <Link
