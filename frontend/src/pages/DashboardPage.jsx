@@ -7,6 +7,12 @@ import MobileTopup from './payments/MobileTopup';
 import CreditCardPayment from './payments/CreditCardPayment';
 import Donations from './payments/Donations';
 import Favorites from './payments/Favorites';
+import RaastIdManagement from './quickAccess/RaastIdManagement';
+import PayDayLoan from './quickAccess/PayDayLoan';
+import PayAnyone from './quickAccess/PayAnyone';
+import MutualFunds from './quickAccess/MutualFunds';
+import DebitCards from './quickAccess/DebitCards';
+import PayeesBillers from './quickAccess/PayeesBillers';
 
 const ORANGE = '#E85D04';
 const BLUE = '#003366';
@@ -267,16 +273,17 @@ export default function DashboardPage() {
               <h2 className="text-sm font-semibold text-gray-700 mb-3">Quick Access</h2>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'RAAST ID Management', sub: 'Manage your RAAST ID', icon: '🏛' },
-                  { label: 'PayDay Loan', sub: 'Instant salary advance', icon: '📅' },
-                  { label: 'Pay Anyone', sub: 'Send money quickly', icon: '👤' },
-                  { label: 'My Mutual Funds', sub: 'Manage your investments', icon: '📊' },
-                  { label: 'Debit Cards', sub: 'Manage your cards', icon: '💳' },
-                  { label: 'Manage Payees & Billers', sub: 'Saved billers/payees', icon: '📂' },
+                  { label: 'RAAST ID Management', sub: 'Manage your RAAST ID', icon: '🏛', modal: 'raast-id' },
+                  { label: 'PayDay Loan', sub: 'Instant salary advance', icon: '📅', modal: 'payday-loan' },
+                  { label: 'Pay Anyone', sub: 'Send money quickly', icon: '👤', modal: 'pay-anyone' },
+                  { label: 'My Mutual Funds', sub: 'Manage your investments', icon: '📊', modal: 'mutual-funds' },
+                  { label: 'Debit Cards', sub: 'Manage your cards', icon: '💳', modal: 'debit-cards' },
+                  { label: 'Manage Payees & Billers', sub: 'Saved billers/payees', icon: '📂', modal: 'payees-billers' },
                 ].map((item) => (
                   <button
                     key={item.label}
                     type="button"
+                    onClick={() => setActiveModal(item.modal)}
                     className="border border-gray-100 rounded-lg px-3 py-3 flex gap-2 items-start hover:border-orange-300 hover:bg-orange-50 transition-colors"
                   >
                     <span className="w-8 h-8 rounded-md bg-orange-50 flex items-center justify-center text-orange-500 text-lg">
@@ -389,6 +396,48 @@ export default function DashboardPage() {
               DONATION: 'donation',
             };
             setActiveModal(modalMap[fav.favorite_type] || null);
+          }}
+        />
+      )}
+
+      {/* Quick Access Modals */}
+      {activeModal === 'raast-id' && (
+        <RaastIdManagement onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'payday-loan' && (
+        <PayDayLoan
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'pay-anyone' && (
+        <PayAnyone
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'mutual-funds' && (
+        <MutualFunds
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'debit-cards' && (
+        <DebitCards onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'payees-billers' && (
+        <PayeesBillers
+          onClose={() => setActiveModal(null)}
+          onSelect={(item) => {
+            // Open corresponding payment modal based on favorite type
+            const modalMap = {
+              TRANSFER: 'transfer',
+              BILL: 'bill',
+            };
+            const targetModal = modalMap[item.favorite_type];
+            if (targetModal) {
+              setActiveModal(targetModal);
+            }
           }}
         />
       )}

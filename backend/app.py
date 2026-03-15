@@ -15,6 +15,7 @@ from models import db, User
 EMAIL_REGEX = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 from whisper_service import transcribe_audio
 from routes.payment_routes import payment_bp
+from routes.quick_access_routes import quick_access_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///voice_auth.db'
@@ -27,6 +28,7 @@ CORS(app)
 
 # Register blueprints
 app.register_blueprint(payment_bp)
+app.register_blueprint(quick_access_bp)
 
 # Initialize database
 db.init_app(app)
