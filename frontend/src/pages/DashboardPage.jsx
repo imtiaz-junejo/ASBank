@@ -1,5 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { getBalance, getTransactions } from '../services/paymentApi';
+import TransferRaast from './payments/TransferRaast';
+import BillPayments from './payments/BillPayments';
+import MobileTopup from './payments/MobileTopup';
+import CreditCardPayment from './payments/CreditCardPayment';
+import Donations from './payments/Donations';
+import Favorites from './payments/Favorites';
 
 const ORANGE = '#E85D04';
 const BLUE = '#003366';
@@ -16,6 +23,58 @@ function getStoredUser() {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const user = useMemo(() => getStoredUser(), []);
+  const [balance, setBalance] = useState(38049.94);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeModal, setActiveModal] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [balanceData, transactionsData] = await Promise.all([
+        getBalance(),
+        getTransactions(5),
+      ]);
+      if (balanceData.success) {
+        setBalance(balanceData.balance);
+      }
+      if (transactionsData.success) {
+        setTransactions(transactionsData.transactions);
+      }
+    } catch (err) {
+      console.error('Failed to load data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    loadData(); // Refresh balance and transactions
+    setActiveModal(null);
+  };
+
+  const handleVoiceCommand = (command) => {
+    const cmd = command.toLowerCase();
+    if (cmd.includes('transfer') || cmd.includes('raast')) {
+      setActiveModal('transfer');
+    } else if (cmd.includes('bill')) {
+      setActiveModal('bill');
+    } else if (cmd.includes('topup') || cmd.includes('mobile') || cmd.includes('recharge')) {
+      setActiveModal('topup');
+    } else if (cmd.includes('credit card')) {
+      setActiveModal('credit-card');
+    } else if (cmd.includes('donation') || cmd.includes('donate')) {
+      setActiveModal('donation');
+    } else if (cmd.includes('favorite')) {
+      setActiveModal('favorites');
+    }
+  };
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -120,7 +179,9 @@ export default function DashboardPage() {
                 </div>
                 <p className="mt-3 text-xs text-gray-600">
                   Net Balance:&nbsp;
-                  <span className="font-semibold text-gray-800">Rs. 38,049.94</span>
+                  <span className="font-semibold text-gray-800">
+                    Rs. {loading ? '...' : balance.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </p>
               </div>
             </section>
@@ -130,16 +191,17 @@ export default function DashboardPage() {
               <h2 className="text-sm font-semibold text-gray-700 mb-3">Payments</h2>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Favorites', icon: '❤' },
-                  { label: 'Bill Payments', icon: '🧾' },
-                  { label: 'Transfer / RAAST', icon: '⇆' },
-                  { label: 'Mobile Topup', icon: '📱' },
-                  { label: 'Credit Card Payment', icon: '💳' },
-                  { label: 'Donations', icon: '🎁' },
+                  { label: 'Favorites', icon: '❤', modal: 'favorites' },
+                  { label: 'Bill Payments', icon: '🧾', modal: 'bill' },
+                  { label: 'Transfer / RAAST', icon: '⇆', modal: 'transfer' },
+                  { label: 'Mobile Topup', icon: '📱', modal: 'topup' },
+                  { label: 'Credit Card Payment', icon: '💳', modal: 'credit-card' },
+                  { label: 'Donations', icon: '🎁', modal: 'donation' },
                 ].map((item) => (
                   <button
                     key={item.label}
                     type="button"
+                    onClick={() => setActiveModal(item.modal)}
                     className="border border-orange-100 rounded-lg py-3 px-3 flex flex-col items-start gap-2 hover:border-orange-300 hover:bg-orange-50 transition-colors"
                   >
                     <span
@@ -174,7 +236,9 @@ export default function DashboardPage() {
                     <p className="text-[11px] text-gray-500">Public School Hyderabad</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-800">Rs. 38,049.94</p>
+                    <p className="font-semibold text-gray-800">
+                      Rs. {loading ? '...' : balance.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
                     <button
                       type="button"
                       className="text-[11px] text-orange-500 hover:underline"
@@ -244,8 +308,30 @@ export default function DashboardPage() {
                     <span className="text-[10px] text-gray-500">▼</span>
                   </button>
                 </div>
-                <div className="h-36 flex items-center justify-center text-orange-400">
-                  Click To View
+                <div className="h-36 overflow-y-auto space-y-2">
+                  {loading ? (
+                    <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                      Loading...
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                      No transactions yet
+                    </div>
+                  ) : (
+                    transactions.map((tx) => (
+                      <div key={tx.id} className="text-xs border-b border-gray-100 pb-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium text-gray-800">{tx.type}</span>
+                          <span className={tx.amount > 0 ? 'text-red-600' : 'text-green-600'}>
+                            {tx.amount > 0 ? '-' : '+'}Rs. {Math.abs(tx.amount).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-gray-500 mt-1">
+                          {tx.receiver} • {new Date(tx.timestamp).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
                 <button
                   type="button"
@@ -258,8 +344,58 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Payment Modals */}
+      {activeModal === 'transfer' && (
+        <TransferRaast
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'bill' && (
+        <BillPayments
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'topup' && (
+        <MobileTopup
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'credit-card' && (
+        <CreditCardPayment
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'donation' && (
+        <Donations
+          onClose={() => setActiveModal(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      {activeModal === 'favorites' && (
+        <Favorites
+          onClose={() => setActiveModal(null)}
+          onSelectFavorite={(fav) => {
+            // Open corresponding modal based on favorite type
+            const modalMap = {
+              TRANSFER: 'transfer',
+              BILL: 'bill',
+              TOPUP: 'topup',
+              CREDIT_CARD: 'credit-card',
+              DONATION: 'donation',
+            };
+            setActiveModal(modalMap[fav.favorite_type] || null);
+          }}
+        />
+      )}
     </div>
   );
 }
+
+
 
 

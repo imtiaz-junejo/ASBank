@@ -14,6 +14,7 @@ from models import db, User
 
 EMAIL_REGEX = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 from whisper_service import transcribe_audio
+from routes.payment_routes import payment_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///voice_auth.db'
@@ -23,6 +24,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Enable CORS for React frontend
 CORS(app)
+
+# Register blueprints
+app.register_blueprint(payment_bp)
 
 # Initialize database
 db.init_app(app)
@@ -48,7 +52,13 @@ with app.app_context():
         if 'voice_language' not in columns:
             db.session.execute(text("ALTER TABLE user ADD COLUMN voice_language VARCHAR(8)"))
             added = True
+        if 'balance' not in columns:
+            db.session.execute(text("ALTER TABLE user ADD COLUMN balance NUMERIC(12, 2) DEFAULT 38049.94"))
+            added = True
         if added:
+            db.session.commit()
+            # Backfill balance for existing users
+            db.session.execute(text("UPDATE user SET balance = 38049.94 WHERE balance IS NULL"))
             db.session.commit()
         # Backfill existing rows only when we have name/password_hash and possibly old username
         if 'username' in columns:

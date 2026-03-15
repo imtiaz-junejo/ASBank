@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
+      '/api': { target: 'http://localhost:5000', changeOrigin: true },
       '/login': { target: 'http://localhost:5000', changeOrigin: true },
       '/signup': { target: 'http://localhost:5000', changeOrigin: true },
       '/health': { target: 'http://localhost:5000', changeOrigin: true },
