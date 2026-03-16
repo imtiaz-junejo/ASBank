@@ -1,15 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { getBalance, getTransactions } from '../services/paymentApi';
-import TransferRaast from './payments/TransferRaast';
-import BillPayments from './payments/BillPayments';
+import DashboardLayout from '../components/DashboardLayout';
 import MobileTopup from './payments/MobileTopup';
 import CreditCardPayment from './payments/CreditCardPayment';
-import Donations from './payments/Donations';
-import Favorites from './payments/Favorites';
 import RaastIdManagement from './quickAccess/RaastIdManagement';
 import PayDayLoan from './quickAccess/PayDayLoan';
-import PayAnyone from './quickAccess/PayAnyone';
 import MutualFunds from './quickAccess/MutualFunds';
 import DebitCards from './quickAccess/DebitCards';
 import PayeesBillers from './quickAccess/PayeesBillers';
@@ -86,74 +82,14 @@ export default function DashboardPage() {
     return <Navigate to="/login" replace />;
   }
 
-  const initial = (user.name || user.email || 'U').charAt(0).toUpperCase();
-
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
-      {/* Top bar */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="p-2 rounded-md border border-gray-200 mr-1"
-                aria-label="Menu"
-              >
-                <span className="block w-4 h-0.5 bg-gray-700 mb-1" />
-                <span className="block w-4 h-0.5 bg-gray-700 mb-1" />
-                <span className="block w-4 h-0.5 bg-gray-700" />
-              </button>
-              <div className="flex items-center gap-2">
-                <span
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-xl"
-                  style={{ backgroundColor: ORANGE }}
-                >
-                  my
-                </span>
-                <span className="text-2xl font-bold tracking-tight">
-                  <span style={{ color: ORANGE }}>my</span>
-                  <span style={{ color: BLUE }}>ASB</span>
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right text-xs">
-                <p className="text-gray-500">Welcome</p>
-                <p className="font-semibold text-gray-800 truncate max-w-[180px]" title={user.name || user.email}>
-                  {user.name || user.email}
-                </p>
-              </div>
-              <button
-                type="button"
-                className="w-9 h-9 rounded-full flex items-center justify-center bg-orange-100 text-sm font-semibold text-orange-700"
-              >
-                {initial}
-              </button>
-              <button
-                type="button"
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
-                aria-label="Logout"
-                onClick={() => {
-                  localStorage.removeItem('vb_user');
-                  navigate('/login', { replace: true });
-                }}
-              >
-                ⏻
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <DashboardLayout>
+      <div className="w-full space-y-6">
           {/* Top row: Account summary, Payments, Spendings */}
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_2.2fr_2.2fr] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_2.2fr_2.2fr] gap-6">
             {/* Account Summary */}
-            <section className="bg-white rounded shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">Account Summary</h2>
+            <section className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-800 mb-4">Account Summary</h2>
               <div className="flex flex-col items-center justify-center h-52">
                 <div className="relative">
                   <svg width="180" height="180" viewBox="0 0 180 180">
@@ -193,21 +129,29 @@ export default function DashboardPage() {
             </section>
 
             {/* Payments */}
-            <section className="bg-white rounded shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">Payments</h2>
+            <section className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-800 mb-4">Payments</h2>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Favorites', icon: '❤', modal: 'favorites' },
-                  { label: 'Bill Payments', icon: '🧾', modal: 'bill' },
-                  { label: 'Transfer / RAAST', icon: '⇆', modal: 'transfer' },
-                  { label: 'Mobile Topup', icon: '📱', modal: 'topup' },
-                  { label: 'Credit Card Payment', icon: '💳', modal: 'credit-card' },
-                  { label: 'Donations', icon: '🎁', modal: 'donation' },
+                  { label: 'Favorites', icon: '❤', route: '/payments/favorites' },
+                  { label: 'Bill Payments', icon: '🧾', route: '/payments/pay-bills' },
+                  { label: 'Transfer / RAAST', icon: '⇆', route: '/payments/funds-transfer' },
+                  { label: 'Mobile Topup', icon: '📱', route: '/payments/mobile-topup' },
+                  { label: 'Credit Card Payment', icon: '💳', route: '/payments/credit-card-payment' },
+                  { label: 'Donations', icon: '🎁', route: '/payments/donations' },
                 ].map((item) => (
                   <button
                     key={item.label}
                     type="button"
-                    onClick={() => setActiveModal(item.modal)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (item.modal) {
+                        setActiveModal(item.modal);
+                      } else {
+                        navigate(item.route, { replace: false });
+                      }
+                    }}
                     className="border border-orange-100 rounded-lg py-3 px-3 flex flex-col items-start gap-2 hover:border-orange-300 hover:bg-orange-50 transition-colors"
                   >
                     <span
@@ -222,8 +166,8 @@ export default function DashboardPage() {
             </section>
 
             {/* My Spendings */}
-            <section className="bg-white rounded shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">My Spendings</h2>
+            <section className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-800 mb-4">My Spendings</h2>
               <div className="h-52 flex items-center justify-center text-xs text-orange-400">
                 Click To View
               </div>
@@ -231,10 +175,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Bottom row: Accounts, Quick Access, Mini Statement */}
-          <div className="grid grid-cols-1 lg:grid-cols-[2.6fr_2.4fr_2.4fr] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[2.6fr_2.4fr_2.4fr] gap-6">
             {/* My Accounts */}
-            <section className="bg-white rounded shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">My Accounts</h2>
+            <section className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-800 mb-4">My Accounts</h2>
               <div className="space-y-2 text-xs">
                 <div className="border-l-4 border-orange-500 bg-orange-50 rounded-r-md px-3 py-2 flex items-center justify-between">
                   <div>
@@ -269,21 +213,27 @@ export default function DashboardPage() {
             </section>
 
             {/* Quick Access */}
-            <section className="bg-white rounded shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">Quick Access</h2>
+            <section className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-800 mb-4">Quick Access</h2>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'RAAST ID Management', sub: 'Manage your RAAST ID', icon: '🏛', modal: 'raast-id' },
-                  { label: 'PayDay Loan', sub: 'Instant salary advance', icon: '📅', modal: 'payday-loan' },
-                  { label: 'Pay Anyone', sub: 'Send money quickly', icon: '👤', modal: 'pay-anyone' },
-                  { label: 'My Mutual Funds', sub: 'Manage your investments', icon: '📊', modal: 'mutual-funds' },
-                  { label: 'Debit Cards', sub: 'Manage your cards', icon: '💳', modal: 'debit-cards' },
-                  { label: 'Manage Payees & Billers', sub: 'Saved billers/payees', icon: '📂', modal: 'payees-billers' },
+                  { label: 'RAAST ID Management', sub: 'Manage your RAAST ID', icon: '🏛', route: '/quick-access/raast-id' },
+                  { label: 'PayDay Loan', sub: 'Instant salary advance', icon: '📅', route: '/quick-access/payday-loan' },
+                  { label: 'Pay Anyone', sub: 'Send money quickly', icon: '👤', route: '/payments/pay-anyone' },
+                  { label: 'My Mutual Funds', sub: 'Manage your investments', icon: '📊', route: '/quick-access/mutual-funds' },
+                  { label: 'Debit Cards', sub: 'Manage your cards', icon: '💳', route: '/quick-access/debit-cards' },
+                  { label: 'Manage Payees & Billers', sub: 'Saved billers/payees', icon: '📂', route: '/quick-access/manage-payees' },
                 ].map((item) => (
                   <button
                     key={item.label}
                     type="button"
-                    onClick={() => setActiveModal(item.modal)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (item.route) {
+                        navigate(item.route, { replace: false });
+                      }
+                    }}
                     className="border border-gray-100 rounded-lg px-3 py-3 flex gap-2 items-start hover:border-orange-300 hover:bg-orange-50 transition-colors"
                   >
                     <span className="w-8 h-8 rounded-md bg-orange-50 flex items-center justify-center text-orange-500 text-lg">
@@ -303,8 +253,8 @@ export default function DashboardPage() {
             </section>
 
             {/* Mini Statement */}
-            <section className="bg-white rounded shadow-sm border border-gray-100 p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">Mini Statement</h2>
+            <section className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-800 mb-4">Mini Statement</h2>
               <div className="space-y-3 text-xs">
                 <div className="flex items-center justify-between">
                   <button
@@ -349,22 +299,9 @@ export default function DashboardPage() {
               </div>
             </section>
           </div>
-        </div>
-      </main>
+      </div>
 
       {/* Payment Modals */}
-      {activeModal === 'transfer' && (
-        <TransferRaast
-          onClose={() => setActiveModal(null)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
-      {activeModal === 'bill' && (
-        <BillPayments
-          onClose={() => setActiveModal(null)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
       {activeModal === 'topup' && (
         <MobileTopup
           onClose={() => setActiveModal(null)}
@@ -377,28 +314,6 @@ export default function DashboardPage() {
           onSuccess={handlePaymentSuccess}
         />
       )}
-      {activeModal === 'donation' && (
-        <Donations
-          onClose={() => setActiveModal(null)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
-      {activeModal === 'favorites' && (
-        <Favorites
-          onClose={() => setActiveModal(null)}
-          onSelectFavorite={(fav) => {
-            // Open corresponding modal based on favorite type
-            const modalMap = {
-              TRANSFER: 'transfer',
-              BILL: 'bill',
-              TOPUP: 'topup',
-              CREDIT_CARD: 'credit-card',
-              DONATION: 'donation',
-            };
-            setActiveModal(modalMap[fav.favorite_type] || null);
-          }}
-        />
-      )}
 
       {/* Quick Access Modals */}
       {activeModal === 'raast-id' && (
@@ -406,12 +321,6 @@ export default function DashboardPage() {
       )}
       {activeModal === 'payday-loan' && (
         <PayDayLoan
-          onClose={() => setActiveModal(null)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
-      {activeModal === 'pay-anyone' && (
-        <PayAnyone
           onClose={() => setActiveModal(null)}
           onSuccess={handlePaymentSuccess}
         />
@@ -429,19 +338,21 @@ export default function DashboardPage() {
         <PayeesBillers
           onClose={() => setActiveModal(null)}
           onSelect={(item) => {
-            // Open corresponding payment modal based on favorite type
+            // Open corresponding payment modal based on favorite type,
+            // and prefill by setting the selected favorite in state
             const modalMap = {
               TRANSFER: 'transfer',
               BILL: 'bill',
             };
             const targetModal = modalMap[item.favorite_type];
             if (targetModal) {
+              setSelectedFavorite(item);
               setActiveModal(targetModal);
             }
           }}
         />
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 

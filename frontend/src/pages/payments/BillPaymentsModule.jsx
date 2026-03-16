@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PaymentNavigation from '../../components/PaymentNavigation';
 import { payBill, getFavorites, addFavorite } from '../../services/paymentApi';
 
 const ORANGE = '#E85D04';
@@ -6,7 +7,7 @@ const BLUE = '#003366';
 
 const BILL_TYPES = ['Electricity', 'Gas', 'Internet', 'Water', 'Telephone'];
 
-export default function BillPayments({ onClose, onSuccess, initialFavorite }) {
+export default function BillPaymentsModule({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     billType: '',
     companyName: '',
@@ -22,18 +23,6 @@ export default function BillPayments({ onClose, onSuccess, initialFavorite }) {
   useEffect(() => {
     loadFavorites();
   }, []);
-
-  // If opened from a favorite (e.g. from quick access), prefill just like clicking a favorite chip
-  useEffect(() => {
-    if (initialFavorite && initialFavorite.data) {
-      setFormData({
-        billType: initialFavorite.data.bill_type || '',
-        companyName: initialFavorite.data.company_name || '',
-        consumerNumber: initialFavorite.data.consumer_number || '',
-        amount: '',
-      });
-    }
-  }, [initialFavorite]);
 
   const loadFavorites = async () => {
     try {
@@ -111,52 +100,97 @@ export default function BillPayments({ onClose, onSuccess, initialFavorite }) {
 
   if (showConfirm) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-6" style={{ color: BLUE }}>
-          Confirm Bill Payment
-        </h2>
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <div className="space-y-3 text-sm">
-            <p>
-              <span className="font-medium text-gray-700">Bill Type:</span> <span className="text-gray-900">{formData.billType}</span>
-            </p>
-            <p>
-              <span className="font-medium text-gray-700">Company:</span> <span className="text-gray-900">{formData.companyName}</span>
-            </p>
-            <p>
-              <span className="font-medium text-gray-700">Consumer Number:</span> <span className="text-gray-900">{formData.consumerNumber}</span>
-            </p>
-            <p>
-              <span className="font-medium text-gray-700">Amount:</span> <span className="text-gray-900">Rs. {parseFloat(formData.amount).toLocaleString()}</span>
-            </p>
-          </div>
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold" style={{ color: BLUE }}>
+            Bill Payment
+          </h2>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-xl"
+            >
+              ×
+            </button>
+          )}
         </div>
-        {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setShowConfirm(false)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            disabled={loading}
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={confirmPayment}
-            className="flex-1 px-4 py-2 rounded-md text-white font-semibold"
-            style={{ backgroundColor: ORANGE }}
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : 'Pay Bill'}
-          </button>
+        <PaymentNavigation />
+        <div className="mt-6">
+          <div className="bg-[#f3f3f3] border border-gray-200 rounded px-4 py-3 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+              <p className="text-sm text-gray-700">
+                You initiated a request for Bill Payment. Please review details before you confirm!
+              </p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Bill Type</span>
+                <span className="text-gray-900">{formData.billType}</span>
+              </div>
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Company</span>
+                <span className="text-gray-900">{formData.companyName}</span>
+              </div>
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Consumer Number</span>
+                <span className="text-gray-900">{formData.consumerNumber}</span>
+              </div>
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Amount</span>
+                <span className="text-gray-900">Rs. {parseFloat(formData.amount).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+          {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={confirmPayment}
+              className="px-6 py-2 rounded bg-[#f46a1e] text-white text-sm font-semibold hover:bg-[#e05c12] flex items-center gap-2"
+              disabled={loading}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5 4L6 11.5L2.5 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {loading ? 'Processing...' : 'Confirm'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConfirm(false)}
+              className="px-6 py-2 rounded bg-gray-200 text-sm text-gray-700 hover:bg-gray-300 flex items-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowConfirm(false);
+                if (onClose) onClose();
+              }}
+              className="px-6 py-2 rounded bg-gray-100 text-sm text-gray-600 hover:bg-gray-200 flex items-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold" style={{ color: BLUE }}>
           Bill Payment
@@ -172,6 +206,9 @@ export default function BillPayments({ onClose, onSuccess, initialFavorite }) {
         )}
       </div>
 
+      <PaymentNavigation />
+
+      <div className="mt-6 bg-white rounded-lg border border-gray-200 p-6">
         {favorites.length > 0 && (
           <div className="mb-4 p-3 bg-gray-50 rounded-md">
             <p className="text-xs font-medium text-gray-700 mb-2">Quick Select:</p>
@@ -299,17 +336,17 @@ export default function BillPayments({ onClose, onSuccess, initialFavorite }) {
             <button
               type="submit"
               disabled={loading}
-              className={`px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60 ${onClose ? 'flex-1' : 'w-full'}`}
+              className={`px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60 ${
+                onClose ? 'flex-1' : 'w-full'
+              }`}
               style={{ backgroundColor: ORANGE }}
             >
               {loading ? 'Processing...' : 'Pay Bill'}
             </button>
           </div>
         </form>
+      </div>
     </div>
   );
 }
-
-
-
 

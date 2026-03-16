@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PaymentNavigation from '../../components/PaymentNavigation';
 import { mobileTopup, getFavorites, addFavorite } from '../../services/paymentApi';
 
 const ORANGE = '#E85D04';
@@ -6,7 +7,7 @@ const BLUE = '#003366';
 
 const NETWORKS = ['Jazz', 'Zong', 'Telenor', 'Ufone', 'Warid'];
 
-export default function MobileTopup({ onClose, onSuccess }) {
+export default function MobileTopupModule({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     mobileNumber: '',
     network: '',
@@ -49,8 +50,8 @@ export default function MobileTopup({ onClose, onSuccess }) {
 
   const validate = () => {
     const e = {};
-    if (!formData.mobileNumber.trim() || formData.mobileNumber.length < 11) {
-      e.mobileNumber = 'Valid mobile number is required';
+    if (!formData.mobileNumber.trim() || formData.mobileNumber.length !== 11) {
+      e.mobileNumber = 'Valid 11-digit mobile number is required';
     }
     if (!formData.network) e.network = 'Network is required';
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
@@ -88,7 +89,7 @@ export default function MobileTopup({ onClose, onSuccess }) {
         if (onClose) onClose();
       }
     } catch (err) {
-      setErrors({ submit: err.message || 'Mobile topup failed' });
+      setErrors({ submit: err.message || 'Topup failed' });
       setShowConfirm(false);
     } finally {
       setLoading(false);
@@ -97,40 +98,84 @@ export default function MobileTopup({ onClose, onSuccess }) {
 
   if (showConfirm) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: BLUE }}>
-            Confirm Mobile Topup
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold" style={{ color: BLUE }}>
+            Mobile Topup
           </h2>
-          <div className="space-y-2 mb-6 text-sm">
-            <p>
-              <span className="font-medium">Mobile Number:</span> {formData.mobileNumber}
-            </p>
-            <p>
-              <span className="font-medium">Network:</span> {formData.network}
-            </p>
-            <p>
-              <span className="font-medium">Amount:</span> Rs. {parseFloat(formData.amount).toLocaleString()}
-            </p>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-xl"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <PaymentNavigation />
+        <div className="mt-6">
+          <div className="bg-[#f3f3f3] border border-gray-200 rounded px-4 py-3 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+              <p className="text-sm text-gray-700">
+                You initiated a request for Mobile Topup. Please review details before you confirm!
+              </p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Mobile Number</span>
+                <span className="text-gray-900">{formData.mobileNumber}</span>
+              </div>
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Network</span>
+                <span className="text-gray-900">{formData.network}</span>
+              </div>
+              <div className="flex">
+                <span className="font-semibold text-gray-700 w-48">Amount</span>
+                <span className="text-gray-900">Rs. {parseFloat(formData.amount).toLocaleString()}</span>
+              </div>
+            </div>
           </div>
           {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => setShowConfirm(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              onClick={confirmTopup}
+              className="px-6 py-2 rounded bg-[#f46a1e] text-white text-sm font-semibold hover:bg-[#e05c12] flex items-center gap-2"
               disabled={loading}
             >
-              Cancel
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5 4L6 11.5L2.5 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {loading ? 'Processing...' : 'Confirm'}
             </button>
             <button
               type="button"
-              onClick={confirmTopup}
-              className="flex-1 px-4 py-2 rounded-md text-white font-semibold"
-              style={{ backgroundColor: ORANGE }}
-              disabled={loading}
+              onClick={() => setShowConfirm(false)}
+              className="px-6 py-2 rounded bg-gray-200 text-sm text-gray-700 hover:bg-gray-300 flex items-center gap-2"
             >
-              {loading ? 'Processing...' : 'Recharge'}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowConfirm(false);
+                if (onClose) onClose();
+              }}
+              className="px-6 py-2 rounded bg-gray-100 text-sm text-gray-600 hover:bg-gray-200 flex items-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Cancel
             </button>
           </div>
         </div>
@@ -139,21 +184,25 @@ export default function MobileTopup({ onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: BLUE }}>
-            Mobile Topup
-          </h2>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold" style={{ color: BLUE }}>
+          Mobile Topup
+        </h2>
+        {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="text-gray-500 hover:text-gray-700 text-xl"
           >
             ×
           </button>
-        </div>
+        )}
+      </div>
 
+      <PaymentNavigation />
+
+      <div className="mt-6 bg-white rounded-lg border border-gray-200 p-6">
         {favorites.length > 0 && (
           <div className="mb-4 p-3 bg-gray-50 rounded-md">
             <p className="text-xs font-medium text-gray-700 mb-2">Quick Select:</p>
@@ -251,20 +300,24 @@ export default function MobileTopup({ onClose, onSuccess }) {
           {errors.submit && <p className="text-red-500 text-sm">{errors.submit}</p>}
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60"
+              className={`px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60 ${
+                onClose ? 'flex-1' : 'w-full'
+              }`}
               style={{ backgroundColor: ORANGE }}
             >
-              {loading ? 'Processing...' : 'Recharge'}
+              {loading ? 'Processing...' : 'Topup'}
             </button>
           </div>
         </form>
@@ -272,8 +325,4 @@ export default function MobileTopup({ onClose, onSuccess }) {
     </div>
   );
 }
-
-
-
-
 

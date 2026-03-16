@@ -20,15 +20,18 @@ def _get_model():
     return _model
 
 
-def transcribe_audio(audio_path):
+def transcribe_audio(audio_path, language=None):
     """
     Transcribe audio file using Whisper
     
     Args:
         audio_path: Path to the audio file
+        language: Optional language code (e.g. "en", "ur").
+                  If None, Whisper will auto-detect the language.
         
     Returns:
-        Transcribed text string or None if transcription fails
+        (transcription, detected_language) tuple.
+        If transcription fails, returns (None, None).
     """
     try:
         if not os.path.exists(audio_path):
@@ -36,13 +39,24 @@ def transcribe_audio(audio_path):
             return None
 
         model = _get_model()
-        result = model.transcribe(audio_path)
+
+        # Whisper's transcribe supports a language argument; if None,
+        # it will try to auto-detect the language.
+        kwargs = {}
+        if language is not None:
+            kwargs["language"] = language
+
+        result = model.transcribe(audio_path, **kwargs)
         
-        # Extract transcribed text
-        transcription = result.get("text", "").strip()
-        
-        return transcription if transcription else None
+        # Extract transcribed text and detected language
+        transcription = (result.get("text") or "").strip()
+        detected_language = result.get("language")
+
+        if not transcription:
+            return None, detected_language
+
+        return transcription, detected_language
 
     except Exception as e:
         print(f"Error transcribing audio: {str(e)}")
-        return None
+        return None, None

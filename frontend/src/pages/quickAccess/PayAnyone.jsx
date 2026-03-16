@@ -57,67 +57,68 @@ export default function PayAnyone({ onClose, onSuccess }) {
 
   if (showConfirm) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: BLUE }}>
-            Confirm Payment
-          </h2>
-          <div className="space-y-2 mb-6 text-sm">
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-6" style={{ color: BLUE }}>
+          Confirm Payment
+        </h2>
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="space-y-3 text-sm">
             <p>
-              <span className="font-medium">Recipient:</span> {formData.recipientName}
+              <span className="font-medium text-gray-700">Recipient:</span> <span className="text-gray-900">{formData.recipientName}</span>
             </p>
             <p>
-              <span className="font-medium">Mobile:</span> {formData.recipientMobile}
+              <span className="font-medium text-gray-700">Mobile:</span> <span className="text-gray-900">{formData.recipientMobile}</span>
             </p>
             <p>
-              <span className="font-medium">Amount:</span> Rs. {parseFloat(formData.amount).toLocaleString()}
+              <span className="font-medium text-gray-700">Amount:</span> <span className="text-gray-900">Rs. {parseFloat(formData.amount).toLocaleString()}</span>
             </p>
             {formData.description && (
               <p>
-                <span className="font-medium">Description:</span> {formData.description}
+                <span className="font-medium text-gray-700">Description:</span> <span className="text-gray-900">{formData.description}</span>
               </p>
             )}
           </div>
-          {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setShowConfirm(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={confirmPayment}
-              className="flex-1 px-4 py-2 rounded-md text-white font-semibold"
-              style={{ backgroundColor: ORANGE }}
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : 'Confirm Payment'}
-            </button>
-          </div>
+        </div>
+        {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setShowConfirm(false)}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            disabled={loading}
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={confirmPayment}
+            className="flex-1 px-4 py-2 rounded-md text-white font-semibold"
+            style={{ backgroundColor: ORANGE }}
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : 'Confirm Payment'}
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: BLUE }}>
-            Pay Anyone
-          </h2>
+    <div className="max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold" style={{ color: BLUE }}>
+          Pay Anyone
+        </h2>
+        {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="text-gray-500 hover:text-gray-700 text-xl"
           >
             ×
           </button>
-        </div>
+        )}
+      </div>
 
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-4">
           <div>
@@ -195,24 +196,25 @@ export default function PayAnyone({ onClose, onSuccess }) {
           {errors.submit && <p className="text-red-500 text-sm">{errors.submit}</p>}
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60"
+              className={`px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60 ${onClose ? 'flex-1' : 'w-full'}`}
               style={{ backgroundColor: ORANGE }}
             >
               {loading ? 'Processing...' : 'Send Payment'}
             </button>
           </div>
         </form>
-      </div>
     </div>
   );
 }

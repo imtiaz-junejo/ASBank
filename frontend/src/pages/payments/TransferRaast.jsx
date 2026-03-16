@@ -5,7 +5,7 @@ import { transferMoney, getFavorites, addFavorite } from '../../services/payment
 const ORANGE = '#E85D04';
 const BLUE = '#003366';
 
-export default function TransferRaast({ onClose, onSuccess }) {
+export default function TransferRaast({ onClose, onSuccess, initialFavorite }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     recipientName: '',
@@ -22,6 +22,18 @@ export default function TransferRaast({ onClose, onSuccess }) {
   useEffect(() => {
     loadFavorites();
   }, []);
+
+  // If opened from a favorite (e.g. from quick access), prefill just like clicking a favorite chip
+  useEffect(() => {
+    if (initialFavorite && initialFavorite.data) {
+      setFormData({
+        recipientName: initialFavorite.data.recipient_name || '',
+        recipientAccount: initialFavorite.data.recipient_account || '',
+        amount: '',
+        description: initialFavorite.data.description || '',
+      });
+    }
+  }, [initialFavorite]);
 
   const loadFavorites = async () => {
     try {
@@ -99,67 +111,68 @@ export default function TransferRaast({ onClose, onSuccess }) {
 
   if (showConfirm) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: BLUE }}>
-            Confirm Transfer
-          </h2>
-          <div className="space-y-2 mb-6 text-sm">
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-6" style={{ color: BLUE }}>
+          Confirm Transfer
+        </h2>
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="space-y-3 text-sm">
             <p>
-              <span className="font-medium">Recipient:</span> {formData.recipientName}
+              <span className="font-medium text-gray-700">Recipient:</span> <span className="text-gray-900">{formData.recipientName}</span>
             </p>
             <p>
-              <span className="font-medium">Account/RAAST ID:</span> {formData.recipientAccount}
+              <span className="font-medium text-gray-700">Account/RAAST ID:</span> <span className="text-gray-900">{formData.recipientAccount}</span>
             </p>
             <p>
-              <span className="font-medium">Amount:</span> Rs. {parseFloat(formData.amount).toLocaleString()}
+              <span className="font-medium text-gray-700">Amount:</span> <span className="text-gray-900">Rs. {parseFloat(formData.amount).toLocaleString()}</span>
             </p>
             {formData.description && (
               <p>
-                <span className="font-medium">Description:</span> {formData.description}
+                <span className="font-medium text-gray-700">Description:</span> <span className="text-gray-900">{formData.description}</span>
               </p>
             )}
           </div>
-          {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setShowConfirm(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={confirmTransfer}
-              className="flex-1 px-4 py-2 rounded-md text-white font-semibold"
-              style={{ backgroundColor: ORANGE }}
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : 'Confirm Transfer'}
-            </button>
-          </div>
+        </div>
+        {errors.submit && <p className="text-red-500 text-sm mb-4">{errors.submit}</p>}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setShowConfirm(false)}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            disabled={loading}
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={confirmTransfer}
+            className="flex-1 px-4 py-2 rounded-md text-white font-semibold"
+            style={{ backgroundColor: ORANGE }}
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : 'Confirm Transfer'}
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: BLUE }}>
-            Transfer / RAAST
-          </h2>
+    <div className="max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold" style={{ color: BLUE }}>
+          Transfer / RAAST
+        </h2>
+        {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="text-gray-500 hover:text-gray-700 text-xl"
           >
             ×
           </button>
-        </div>
+        )}
+      </div>
 
         {favorites.length > 0 && (
           <div className="mb-4 p-3 bg-gray-50 rounded-md">
@@ -268,24 +281,25 @@ export default function TransferRaast({ onClose, onSuccess }) {
           {errors.submit && <p className="text-red-500 text-sm">{errors.submit}</p>}
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60"
+              className={`px-4 py-2 rounded-md text-white font-semibold disabled:opacity-60 ${onClose ? 'flex-1' : 'w-full'}`}
               style={{ backgroundColor: ORANGE }}
             >
-              {loading ? 'Processing...' : 'Confirm Transfer'}
+              {loading ? 'Processing...' : 'Transfer'}
             </button>
           </div>
         </form>
-      </div>
     </div>
   );
 }
